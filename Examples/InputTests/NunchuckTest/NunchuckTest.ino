@@ -144,11 +144,12 @@ void loop() {
     Serial.println(joyY);
 
     // -------------------
-    // Joystick
+    // Accelerometer
     // -------------------
 
 
-    // Read the accelerometer (0-1023)
+    // Read the accelerometer's X, Y, and Z axes (0-1023).
+    // 512 is roughly centered; values change as the controller tilts.
     int accelX = nchuk.accelX();
     int accelY = nchuk.accelY();
     int accelZ = nchuk.accelZ();
