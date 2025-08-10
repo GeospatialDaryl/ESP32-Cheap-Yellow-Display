@@ -227,13 +227,13 @@ void DrawDate()
         int h = tft.fontHeight();
         tft.fillRect(0, 210 - h, 320, h, TFT_BLACK);
 
-        tft.drawString(buffer, 320 / 2, 210);
+        projectDisplay->drawText(buffer, 320 / 2, 210, clockFontColor, clockBackgroundColor, clockFont, true);
 
         int dow = weekday(local);
         String dayNames[] = {"", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
         tft.setTextSize(4);
         tft.fillRect(0, 170 - h, 320, h, TFT_BLACK);
-        tft.drawString(dayNames[dow], 320 / 2, 170);
+        projectDisplay->drawText(dayNames[dow], 320 / 2, 170, clockFontColor, clockBackgroundColor, clockFont, true);
     }
 }
 
