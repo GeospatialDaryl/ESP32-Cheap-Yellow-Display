@@ -1,27 +1,28 @@
 
-class Digit
-{
+class Digit {
 private:
     int m_value;
     int m_newValue;
     int m_frame;
     int m_height;
-    int m_x;
-    int m_y;
+    struct Position {
+        int x;
+        int y;
+    } m_position;
 
 public:
-    Digit(int value);
+    explicit Digit(int value);
     ~Digit();
-    int Value();
-    int Value(int value);
-    int NewValue();
-    int NewValue(int newValue);
-    int Frame();
-    int Frame(int frame);
-    int Height();
-    int Height(int height);
-    void SetXY(int x, int y);
-    int X();
-    int Y();
+    int getValue() const;
+    void setValue(int value);
+    int getNewValue() const;
+    void setNewValue(int newValue);
+    int getFrame() const;
+    void setFrame(int frame);
+    int getHeight() const;
+    void setHeight(int height);
+    void setPosition(int x, int y);
+    int getX() const;
+    int getY() const;
 };
 

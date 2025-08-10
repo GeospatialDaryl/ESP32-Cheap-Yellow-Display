@@ -16,17 +16,6 @@
 // Additional Libraries - each one of these will need to be installed.
 // ----------------------------
 
-#include <WiFiManager.h>
-// Captive portal for configuring the WiFi
-
-// If installing from the library manager (Search for "WifiManager")
-// https://github.com/tzapu/WiFiManager
-
-#include <ESP_DoubleResetDetector.h>
-// A library for checking if the reset button has been pressed twice
-// Can be used to enable config mode
-// Can be installed from the library manager (Search for "ESP_DoubleResetDetector")
-// https://github.com/khoih-prog/ESP_DoubleResetDetector
 
 #include <ezTime.h>
 // Library used for getting the time and converting session time
@@ -46,39 +35,22 @@
 // ----------------------------
 
 #include "projectConfig.h"
-
 #include "projectDisplay.h"
-
 #include "wifiManagerHandler.h"
-
 #include "cheapYellowLCD.h"
-
-// Number of seconds after reset during which a
-// subseqent reset will be considered a double reset.
-#define DRD_TIMEOUT 10
-
-// RTC Memory Address for the DoubleResetDetector to use
-#define DRD_ADDRESS 0
 
 ProjectConfig projectConfig;
 
-CheapYellowDisplay cyd;
-ProjectDisplay *projectDisplay = &cyd;
+CheapYellowDisplay projectDisplay;
+WiFiManagerHandler wifiManager;
 
 Timezone myTZ;
 
 void baseProjectSetup()
 {
-    projectDisplay->displaySetup();
+    projectDisplay.displaySetup();
 
-    bool forceConfig = false;
-
-    drd = new DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
-    if (drd->detectDoubleReset())
-    {
-        Serial.println(F("Forcing config mode as there was a Double reset detected"));
-        forceConfig = true;
-    }
+    bool forceConfig = wifiManager.detectDoubleReset();
 
     // Initialise SPIFFS, if this fails try .begin(true)
     // NOTE: I believe this formats it though it will erase everything on
@@ -101,7 +73,7 @@ void baseProjectSetup()
     }
 
     // While Wifi is not connected it will not progress past here
-    setupWiFiManager(forceConfig, projectConfig, projectDisplay);
+    wifiManager.setupWiFiManager(forceConfig, projectConfig, projectDisplay);
 
     // Set WiFi to station mode and disconnect from an AP if it was Previously
     // connected
@@ -135,5 +107,5 @@ void baseProjectSetup()
 
 void baseProjectLoop()
 {
-    drd->loop();
+    wifiManager.loop();
 }

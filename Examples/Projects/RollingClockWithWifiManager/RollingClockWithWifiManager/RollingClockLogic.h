@@ -51,20 +51,20 @@ void CalculateDigitOffsets()
     int DigitWidth = tft.textWidth("8");
     int colonWidth = tft.textWidth(":");
     int left = SHOW_AMPM ? 10 : (width - DigitWidth * 6 - colonWidth * 2) / 2;
-    digs[0]->SetXY(left, y);                      // HH
-    digs[1]->SetXY(digs[0]->X() + DigitWidth, y); // HH
+      digs[0]->setPosition(left, y);                      // HH
+      digs[1]->setPosition(digs[0]->getX() + DigitWidth, y); // HH
 
-    colons[0] = digs[1]->X() + DigitWidth; // :
+      colons[0] = digs[1]->getX() + DigitWidth; // :
 
-    digs[2]->SetXY(colons[0] + colonWidth, y); // MM
-    digs[3]->SetXY(digs[2]->X() + DigitWidth, y);
+      digs[2]->setPosition(colons[0] + colonWidth, y); // MM
+      digs[3]->setPosition(digs[2]->getX() + DigitWidth, y);
 
-    colons[1] = digs[3]->X() + DigitWidth; // :
+      colons[1] = digs[3]->getX() + DigitWidth; // :
 
-    digs[4]->SetXY(colons[1] + colonWidth, y); // SS
-    digs[5]->SetXY(digs[4]->X() + DigitWidth, y);
+      digs[4]->setPosition(colons[1] + colonWidth, y); // SS
+      digs[5]->setPosition(digs[4]->getX() + DigitWidth, y);
 
-    ampm[0] = digs[5]->X() + DigitWidth + 4;
+      ampm[0] = digs[5]->getX() + DigitWidth + 4;
     ampm[1] = y - 2;
 }
 
@@ -78,7 +78,7 @@ void SetupDigits()
     for (size_t i = 0; i < 6; i++)
     {
         digs[i] = new Digit(0);
-        digs[i]->Height(tft.fontHeight());
+        digs[i]->setHeight(tft.fontHeight());
     }
 
     //-- Measure font widths --
@@ -113,47 +113,47 @@ void DrawADigit(Digit *digg); // Without this line, compiler says: error: variab
 
 void DrawADigit(Digit *digg)
 {
-    if (digg->Value() == digg->NewValue())
+    if (digg->getValue() == digg->getNewValue())
     {
-        sprite.drawNumber(digg->Value(), 0, 0);
-        sprite.pushSprite(digg->X(), digg->Y());
+        sprite.drawNumber(digg->getValue(), 0, 0);
+        sprite.pushSprite(digg->getX(), digg->getY());
     }
     else
     {
-        for (size_t f = 0; f <= digg->Height(); f++)
+        for (size_t f = 0; f <= digg->getHeight(); f++)
         {
-            digg->Frame(f);
-            sprite.drawNumber(digg->Value(), 0, -digg->Frame());
-            sprite.drawNumber(digg->NewValue(), 0, digg->Height() - digg->Frame());
-            sprite.pushSprite(digg->X(), digg->Y());
+            digg->setFrame(f);
+            sprite.drawNumber(digg->getValue(), 0, -digg->getFrame());
+            sprite.drawNumber(digg->getNewValue(), 0, digg->getHeight() - digg->getFrame());
+            sprite.pushSprite(digg->getX(), digg->getY());
             delay(5);
         }
-        digg->Value(digg->NewValue());
+        digg->setValue(digg->getNewValue());
     }
 }
 
 void DrawDigitsAtOnce()
 {
     tft.setTextDatum(TL_DATUM);
-    for (size_t f = 0; f <= digs[0]->Height(); f++) // For all animation frames...
+    for (size_t f = 0; f <= digs[0]->getHeight(); f++) // For all animation frames...
     {
         for (size_t di = 0; di < 6; di++) // for all Digits...
         {
             Digit *dig = digs[di];
-            if (dig->Value() == dig->NewValue()) // If Digit is not changing...
+            if (dig->getValue() == dig->getNewValue()) // If Digit is not changing...
             {
                 if (f == 0) //... and this is first frame, just draw it to screeen without animation.
                 {
-                    sprite.drawNumber(dig->Value(), 0, 0);
-                    sprite.pushSprite(dig->X(), dig->Y());
+                    sprite.drawNumber(dig->getValue(), 0, 0);
+                    sprite.pushSprite(dig->getX(), dig->getY());
                 }
             }
             else // However, if a Digit is changing value, we need to draw animation frame "f"
             {
-                dig->Frame(f);                                                       // Set the animation offset
-                sprite.drawNumber(dig->Value(), 0, -dig->Frame());                   // Scroll up the current value
-                sprite.drawNumber(dig->NewValue(), 0, dig->Height() - dig->Frame()); // while make new value appear from below
-                sprite.pushSprite(dig->X(), dig->Y());                               // Draw the current animation frame to actual screen.
+                dig->setFrame(f);                                                       // Set the animation offset
+                sprite.drawNumber(dig->getValue(), 0, -dig->getFrame());                   // Scroll up the current value
+                sprite.drawNumber(dig->getNewValue(), 0, dig->getHeight() - dig->getFrame()); // while make new value appear from below
+                sprite.pushSprite(dig->getX(), dig->getY());                               // Draw the current animation frame to actual screen.
             }
         }
         delay(5);
@@ -163,7 +163,7 @@ void DrawDigitsAtOnce()
     for (size_t di = 0; di < 6; di++)
     {
         Digit *dig = digs[di];
-        dig->Value(dig->NewValue());
+        dig->setValue(dig->getNewValue());
     }
 }
 
@@ -172,10 +172,10 @@ void DrawDigitsWithoutAnimation()
     for (size_t di = 0; di < 6; di++)
     {
         Digit *dig = digs[di];
-        dig->Value(dig->NewValue());
-        dig->Frame(0);
-        sprite.drawNumber(dig->NewValue(), 0, 0);
-        sprite.pushSprite(dig->X(), dig->Y());
+        dig->setValue(dig->getNewValue());
+        dig->setFrame(0);
+        sprite.drawNumber(dig->getNewValue(), 0, 0);
+        sprite.pushSprite(dig->getX(), dig->getY());
     }
 }
 
@@ -191,12 +191,12 @@ void DrawDigitsOneByOne()
 void ParseDigits()
 {
     time_t local = myTZ.now();
-    digs[0]->NewValue((SHOW_24HOUR ? hour(local) : hourFormat12(local)) / 10);
-    digs[1]->NewValue((SHOW_24HOUR ? hour(local) : hourFormat12(local)) % 10);
-    digs[2]->NewValue(minute(local) / 10);
-    digs[3]->NewValue(minute(local) % 10);
-    digs[4]->NewValue(second(local) / 10);
-    digs[5]->NewValue(second(local) % 10);
+    digs[0]->setNewValue((SHOW_24HOUR ? hour(local) : hourFormat12(local)) / 10);
+    digs[1]->setNewValue((SHOW_24HOUR ? hour(local) : hourFormat12(local)) % 10);
+    digs[2]->setNewValue(minute(local) / 10);
+    digs[3]->setNewValue(minute(local) % 10);
+    digs[4]->setNewValue(second(local) / 10);
+    digs[5]->setNewValue(second(local) % 10);
     ispm = isPM(local);
 }
 
@@ -227,13 +227,13 @@ void DrawDate()
         int h = tft.fontHeight();
         tft.fillRect(0, 210 - h, 320, h, TFT_BLACK);
 
-        projectDisplay->drawText(buffer, 320 / 2, 210, clockFontColor, clockBackgroundColor, clockFont, true);
+        projectDisplay.drawText(buffer, 320 / 2, 210, clockFontColor, clockBackgroundColor, clockFont, true);
 
         int dow = weekday(local);
         String dayNames[] = {"", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
         tft.setTextSize(4);
         tft.fillRect(0, 170 - h, 320, h, TFT_BLACK);
-        projectDisplay->drawText(dayNames[dow], 320 / 2, 170, clockFontColor, clockBackgroundColor, clockFont, true);
+        projectDisplay.drawText(dayNames[dow], 320 / 2, 170, clockFontColor, clockBackgroundColor, clockFont, true);
     }
 }
 

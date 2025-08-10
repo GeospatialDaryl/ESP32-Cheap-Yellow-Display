@@ -1,75 +1,47 @@
 #include "Digit.h"
 
-// Constructor
-//
-// The original implementation only initialized the value-related members
-// and left geometry fields like height and position uninitialised. Using
-// those members before explicitly setting them would result in random
-// values being read, leading to unpredictable behaviour when drawing the
-// digits. We now initialise all members to sensible defaults.
 Digit::Digit(int value)
-    : m_value(value),
-      m_newValue(value),
-      m_frame(0),
-      m_height(0),
-      m_x(0),
-      m_y(0)
-{}
+    : m_value(value), m_newValue(value), m_frame(0), m_height(0), m_position{0, 0} {}
 
-int Digit::Value()
-{
+Digit::~Digit() {}
+
+int Digit::getValue() const {
     return m_value;
 }
 
-int Digit::Value(int value)
-{
+void Digit::setValue(int value) {
     m_value = value;
     m_newValue = value;
-    return m_value;
 }
 
-int Digit::NewValue()
-{
+int Digit::getNewValue() const {
     return m_newValue;
 }
 
-int Digit::NewValue(int newValue)
-{
+void Digit::setNewValue(int newValue) {
     m_newValue = newValue;
-    return m_newValue;
 }
 
-int Digit::Frame()
-{
+int Digit::getFrame() const {
     return m_frame;
 }
 
-int Digit::Frame(int frame)
-{
+void Digit::setFrame(int frame) {
     m_frame = frame;
-    return m_frame;
 }
 
-int Digit::Height()
-{
+int Digit::getHeight() const {
     return m_height;
 }
 
-int Digit::Height(int height)
-{
+void Digit::setHeight(int height) {
     m_height = height;
-    return m_height;
 }
 
-void Digit::SetXY(int x, int y)
-{
-    m_x = x;
-    m_y = y;
+void Digit::setPosition(int x, int y) {
+    m_position.x = x;
+    m_position.y = y;
 }
 
-int Digit::X() { return m_x; };
-int Digit::Y() { return m_y; };
-
-Digit::~Digit()
-{
-}
+int Digit::getX() const { return m_position.x; }
+int Digit::getY() const { return m_position.y; }
