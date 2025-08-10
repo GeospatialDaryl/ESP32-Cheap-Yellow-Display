@@ -32,6 +32,44 @@
 // Can be installed from the library manager (Search for "TFT_eSPI")
 // https://github.com/Bodmer/TFT_eSPI
 
+struct Hotspot {
+  uint16_t x, y, w, h;
+  void (*onPress)();
+};
+
+static const uint8_t MAX_HOTSPOTS = 16;
+Hotspot hotspots[MAX_HOTSPOTS];
+bool hotspotPressed[MAX_HOTSPOTS];
+uint8_t hotspotCount = 0;
+
+void registerHotspot(uint16_t x, uint16_t y, uint16_t w, uint16_t h, void (*onPress)()) {
+  if (hotspotCount < MAX_HOTSPOTS) {
+    hotspots[hotspotCount] = {x, y, w, h, onPress};
+    hotspotPressed[hotspotCount] = false;
+    hotspotCount++;
+  }
+}
+
+void registerJpegHotspot(uint16_t jpegX, uint16_t jpegY, uint16_t x, uint16_t y, uint16_t w, uint16_t h, void (*onPress)()) {
+  registerHotspot(jpegX + x, jpegY + y, w, h, onPress);
+}
+
+void checkTouchHotspots(const TouchPoint &p) {
+  for (uint8_t i = 0; i < hotspotCount; ++i) {
+    bool inside = (p.zRaw > 0) &&
+                  (p.x >= hotspots[i].x) && (p.x < hotspots[i].x + hotspots[i].w) &&
+                  (p.y >= hotspots[i].y) && (p.y < hotspots[i].y + hotspots[i].h);
+    if (inside && !hotspotPressed[i]) {
+      hotspotPressed[i] = true;
+      if (hotspots[i].onPress) {
+        hotspots[i].onPress();
+      }
+    } else if (!inside) {
+      hotspotPressed[i] = false;
+    }
+  }
+}
+
 
 // ----------------------------
 // Touch Screen pins
@@ -52,6 +90,22 @@ XPT2046_Bitbang ts(XPT2046_MOSI, XPT2046_MISO, XPT2046_CLK, XPT2046_CS);
 TFT_eSPI tft = TFT_eSPI();
 
 TFT_eSPI_Button key[6];
+
+void button1Pressed() { Serial.println("Hotspot 1 pressed"); }
+void button2Pressed() { Serial.println("Hotspot 2 pressed"); }
+void button3Pressed() { Serial.println("Hotspot 3 pressed"); }
+void button4Pressed() { Serial.println("Hotspot 4 pressed"); }
+void button5Pressed() { Serial.println("Hotspot 5 pressed"); }
+void button6Pressed() { Serial.println("Hotspot 6 pressed"); }
+
+void (*buttonCallbacks[6])() = {
+  button1Pressed,
+  button2Pressed,
+  button3Pressed,
+  button4Pressed,
+  button5Pressed,
+  button6Pressed,
+};
 
 void setup() {
   Serial.begin(115200);
@@ -89,6 +143,7 @@ void drawButtons() {
                       1);
 
     key[i].drawButton(false, String(i+1));
+    registerHotspot(bWidth * (i%3), bHeight * (i/3), bWidth, bHeight, buttonCallbacks[i]);
   }
 }
 
@@ -107,16 +162,15 @@ void loop() {
   for (uint8_t b = 0; b < 6; b++) {
     // If button was just pressed, redraw inverted button
     if (key[b].justPressed()) {
-      Serial.printf("Button %d pressed\n", b);
       key[b].drawButton(true, String(b+1));
     }
 
     // If button was just released, redraw normal color button
     if (key[b].justReleased()) {
-      Serial.printf("Button %d released\n", b);
-      Serial.println("Button " + (String)b + " released");
       key[b].drawButton(false, String(b+1));
     }
   }
+
+  checkTouchHotspots(p);
   delay(50);
 }
