@@ -29,12 +29,7 @@
 // Can be installed from the library manager (Search for "SdFat")
 // https://github.com/greiman/SdFat
 
-typedef SdBaseFile File; // Avoid compile issues
-#include <JPEGDEC.h>
-// A library for decoding JPGs
-//
-// Can be installed from the library manager (Search for "JPEGDEC")
-// https://github.com/bitbank2/JPEGDEC
+#include "../../Helpers/JpegRender.h"
 
 
 // ----------------------------
@@ -51,7 +46,6 @@ typedef SdBaseFile File; // Avoid compile issues
 #define XPT2046_CS 33
 
 TFT_eSPI tft = TFT_eSPI();
-JPEGDEC jpeg;
 
 XPT2046_Bitbang ts = XPT2046_Bitbang(XPT2046_MOSI, XPT2046_MISO, XPT2046_CLK, XPT2046_CS);
 
@@ -60,7 +54,6 @@ SPIClass sdSpi = SPIClass(VSPI);
 SdSpiConfig sdSpiConfig = SdSpiConfig(SS, DEDICATED_SPI, SD_SCK_MHZ(32), &sdSpi);
 SdFat sd;
 SdBaseFile root;
-SdBaseFile jpgFile;
 int16_t currentIndex = 0;
 uint16_t fileCount = 0;
 
@@ -74,37 +67,6 @@ void IRAM_ATTR buttonInt() {
     buttonPressed = true;
 }
 
-int JPEGDraw(JPEGDRAW *pDraw) {
-  tft.pushImage(pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight, pDraw->pPixels);
-  return 1;
-}
-
-void * myOpen(const char *filename, int32_t *size) {
-  jpgFile = sd.open(filename);
-  *size = jpgFile.fileSize();
-  return &jpgFile;
-}
-void myClose(void *handle) {
-  if (jpgFile) jpgFile.close();
-}
-int32_t myRead(JPEGFILE *handle, uint8_t *buffer, int32_t length) {
-  if (!jpgFile) return 0;
-  return jpgFile.read(buffer, length);
-}
-int32_t mySeek(JPEGFILE *handle, int32_t position) {
-  if (!jpgFile) return 0;
-  return jpgFile.seekSet(position);
-}
-
-void decodeJpeg(const char *name) {
-  jpeg.open(name, myOpen, myClose, myRead, mySeek, JPEGDraw);
-  // If the image doesn't fill the screen: make background black (but safe the time if not needed)
-  if(jpeg.getWidth() < tft.width() || jpeg.getHeight() < tft.height()) {
-    tft.fillScreen(TFT_BLACK);
-  }
-  jpeg.decode((tft.width()-jpeg.getWidth())/2, (tft.height()-jpeg.getHeight())/2, 0);
-  jpeg.close();
-}
 
 void loadImage(uint16_t targetIndex) {
   if(targetIndex >= fileCount) {
@@ -140,7 +102,7 @@ void loadImage(uint16_t targetIndex) {
 
     Serial.print("File: "); Serial.println(name);
 
-    decodeJpeg(name);
+    drawJpeg(name, tft);
 
     entry.close();
     return;
