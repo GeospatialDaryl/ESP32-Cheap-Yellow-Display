@@ -49,7 +49,9 @@
 TFT_eSPI tft = TFT_eSPI();
 
 int buttonArray[] = {35,22,27};
-int arraySize = 3;
+const char* buttonNames[] = {"IO35","IO22","IO27"};
+const int arraySize = sizeof(buttonArray) / sizeof(buttonArray[0]);
+bool previousStates[arraySize];
 
 void setup() {
 
@@ -59,35 +61,53 @@ void setup() {
   for(int i =0; i < arraySize; i++){
     int pinNum = buttonArray[i];
     pinMode(pinNum, INPUT_PULLUP);
+    previousStates[i] = HIGH;
   }
-  
+
   // Start the tft display and set it to black
   tft.init();
   tft.setRotation(1); //This is the display in landscape
-  
+
   // Clear the screen before writing to it
   tft.fillScreen(TFT_BLACK);
 
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  int x = 5;
-  int y = 10;
-  int fontSize = 2; 
-  tft.drawString("Hello", x, y, fontSize); // Left Aligned
-  x = 320 /2;
-  y += 16;
-  tft.setTextColor(TFT_BLUE, TFT_BLACK);
-  tft.drawCentreString("World", x, y, fontSize);
+  tft.drawString("No button pressed", 5, 10, 2);
 
 }
 
 void loop() {
+  bool stateChanged = false;
   for(int i =0; i < arraySize; i++){
     int pinNum = buttonArray[i];
-    if(!digitalRead(pinNum)){
-      Serial.print(pinNum);
-      Serial.println(" is pressed");
+    int currentState = digitalRead(pinNum);
+    if(currentState != previousStates[i]){
+      previousStates[i] = currentState;
+      stateChanged = true;
+      if(currentState == LOW){
+        Serial.print(buttonNames[i]);
+        Serial.println(" pressed");
+      }
     }
   }
+
+  if(stateChanged){
+    tft.fillScreen(TFT_BLACK);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    int y = 10;
+    bool anyPressed = false;
+    for(int i =0; i < arraySize; i++){
+      if(previousStates[i] == LOW){
+        tft.drawString(String(buttonNames[i]) + " pressed", 5, y, 2);
+        y += 16;
+        anyPressed = true;
+      }
+    }
+    if(!anyPressed){
+      tft.drawString("No button pressed", 5, 10, 2);
+    }
+  }
+
   delay(50);
 
 }
