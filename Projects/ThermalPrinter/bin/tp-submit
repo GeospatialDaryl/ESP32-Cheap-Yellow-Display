@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+import sys
+from pathlib import Path
+
+LIB_DIR = Path(__file__).resolve().parents[1] / "lib"
+if LIB_DIR.exists():
+    sys.path.insert(0, str(LIB_DIR))
+
+from Projects.ThermalPrinter.src.cli import submit_app  # noqa: E402
+
+if __name__ == "__main__":
+    submit_app(prog_name="tp-submit", standalone_mode=True)
