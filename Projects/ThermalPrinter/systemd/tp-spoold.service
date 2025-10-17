@@ -1,0 +1,17 @@
+[Unit]
+Description=MPU-L465 thermal printer spooler
+After=network.target
+
+[Service]
+Type=simple
+User=tprinter
+Group=tprinter
+WorkingDirectory=/var/lib/tprinter
+ExecStart=/opt/tprinter/bin/tp-spoold --config-path /etc/tprinter/config.yaml
+Restart=on-failure
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/opt/tprinter/lib
+
+[Install]
+WantedBy=multi-user.target

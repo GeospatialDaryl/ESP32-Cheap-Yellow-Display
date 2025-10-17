@@ -1,0 +1,6 @@
+Pillow>=10.0
+python-barcode>=0.15
+qrcode[pil]>=7.4
+PyYAML>=6.0
+typer[all]>=0.9
+loguru>=0.7

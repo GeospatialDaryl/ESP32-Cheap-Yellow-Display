@@ -1,0 +1,9 @@
+spool_path: /var/spool/tprinter
+state_path: /var/lib/tprinter
+log_path: /var/log/tprinter
+printer_device: /dev/usb/lp1
+max_retries: 3
+retry_delay_s: 2.0
+line_spacing: 8
+max_line_width: 384
+locale: en_US.UTF-8
